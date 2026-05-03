@@ -323,9 +323,14 @@ jobs:
           if grep -q "ID=fedora" /etc/os-release; then
             dnf install -y git
             dnf install -y gcc gcc-c++ cmake git boost-devel tinyxml-devel vtk-devel hdf5-devel \
-                           CGAL-devel octave python3-pip \
+                           CGAL-devel octave octave-devel python3-pip \
                            python3-setuptools python3-setuptools_scm \
                            python3-Cython python3-numpy python3-h5py python3-matplotlib
+
+            # redhat-rpm-config provides /usr/lib/rpm/redhat/redhat-hardened-ld,
+            # which GCC on Fedora requires for compilation, but is absent from the
+            # minimal container image.
+            dnf install -y redhat-rpm-config
 
             # only for CI/CD test builds without networks.
             dnf install -y iproute
@@ -335,7 +340,7 @@ jobs:
 
             dnf install -y git
             dnf install -y gcc gcc-c++ cmake git boost-devel tinyxml-devel vtk-devel hdf5-devel \
-                           CGAL-devel octave python3-pip \
+                           CGAL-devel octave octave-devel python3-pip \
                            python3-setuptools python3-wheel python3-setuptools_scm \
                            python3-Cython python3-numpy python3-h5py python3-matplotlib
 
@@ -370,6 +375,8 @@ jobs:
               # install CGAL from source.
               apt-get install -y boost1.55 boost1.55-dev
 
+              apt-get install -y liboctave-dev
+
               # CGAL v4.14.3 was old enough to be compatible with GCC 4.8. Otherwise,
               # you get: The compiler feature "cxx_decltype_auto" is not known
               # to CXX compiler "GNU" version 4.8.5.
@@ -398,6 +405,8 @@ jobs:
               apt-get install -y libboost-all-dev
               apt-get install -y libcgal-dev
               apt-get install -y cmake
+              # octave-dev (Bookworm+/Ubuntu 22.04+) was renamed from liboctave-dev (Bullseye and older)
+              apt-get install -y octave-dev || apt-get install -y liboctave-dev
               apt-get install -y python3-setuptools-scm cython3 python3-matplotlib
 
               # testing Python packages in isolated venv
@@ -407,7 +416,7 @@ jobs:
             apk add bash \
                     build-base gmp-dev mpfr-dev git cmake \
                     boost-dev tinyxml-dev hdf5-dev cgal-dev vtk-dev \
-                    octave \
+                    octave octave-dev \
                     python3-dev py3-pip \
                     py3-setuptools py3-setuptools_scm cython \
                     py3-numpy py3-h5py py3-matplotlib
@@ -419,7 +428,7 @@ jobs:
             yum install -y epel-release
             yum install -y git
             yum install -y gcc gcc-c++ gmp-devel mpfr-devel \
-                           cmake3 git tinyxml-devel vtk-devel hdf5-devel octave \
+                           cmake3 git tinyxml-devel vtk-devel hdf5-devel octave octave-devel \
                            python3-devel python3-pip \
                            python3-setuptools python3-setuptools_scm python3-Cython
 
@@ -526,6 +535,9 @@ jobs:
 
           echo "addpath('~/opt/share/openEMS/matlab')" >> ~/.octaverc
           echo "addpath('~/opt/share/CSXCAD/matlab')" >> ~/.octaverc
+
+      - name: Run Octave setup (compile h5readatt_octave)
+        run: octave --no-gui --eval "setup()"
 
       - name: Build and install openEMS Python module with --no-build-isolation
         run: |
@@ -784,6 +796,9 @@ jobs:
 
           echo "addpath('~/opt/share/openEMS/matlab')" >> ~/.octaverc
           echo "addpath('~/opt/share/CSXCAD/matlab')" >> ~/.octaverc
+
+      - name: Run Octave setup (compile h5readatt_octave)
+        run: octave --no-gui --eval "setup()"
 
       - name: Build and install openEMS Python module with --no-build-isolation
         run: |
