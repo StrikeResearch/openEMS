@@ -176,14 +176,6 @@ bool Operator_Ext_LumpedRLC::BuildExtension()
 		dir = cs_RLC_props->GetDirection();
 		lumpedType = cs_RLC_props->GetLEtype();
 
-		//		if (lumpedType == LEtype::INVALID
-		if (lumpedType == CSPropLumpedElement::INVALID)
-		{
-			cerr << "Operator_Ext_LumpedRLC::BuildExtension(): Warning: RLCtype is invalid! considering as parallel. "
-					<< " ID: " << cs_RLC_props->GetID() << " @ Property: " << cs_RLC_props->GetName() << endl;
-			lumpedType = CSPropLumpedElement::PARALLEL;
-		}
-
 		// Extract R, L and C from property class
 		C = cs_RLC_props->GetCapacity();
 		if (C < 0.0)
@@ -336,10 +328,6 @@ bool Operator_Ext_LumpedRLC::BuildExtension()
 							// Separate to two different cases. Parallel and series
 							switch (lumpedType)
 							{
-								case CSPropLumpedElement::INVALID:
-									// this can not happen as it is handled above and asummed as PARALLEL
-									break;
-
 								case CSPropLumpedElement::PARALLEL:
 									// If a capacitor was set, use it. Otherwise, use the existing node capacitor
 									if (dC > 0)
